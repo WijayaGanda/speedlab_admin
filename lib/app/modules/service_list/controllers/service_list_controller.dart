@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:speedlab_admin/app/data/models/service_model.dart';
 import 'package:speedlab_admin/app/data/providers/service_provider.dart';
+import 'package:speedlab_admin/app/utils/widget/custom_snackbar.dart';
 
 class ServiceListController extends GetxController {
   final ServiceProvider serviceProvider;
@@ -33,6 +34,27 @@ class ServiceListController extends GetxController {
   }
 
   void moveToAddService() {
-    Get.toNamed('/add-service', arguments: services);
+    Get.toNamed('/add-service');
+  }
+
+  void moveToEditService(ServiceModel service) {
+    Get.toNamed('/edit-service', arguments: service);
+  }
+
+  Future<void> deleteService(String id) async {
+    try {
+      isLoading.value = true;
+      final response = await serviceProvider.deleteService(id);
+      if (response.isOk) {
+        CustomSnackbar.success('Success', 'Layanan berhasil dihapus');
+        Get.offAllNamed('/dashboard');
+      } else {
+        CustomSnackbar.error('Error', 'Gagal menghapus layanan');
+      }
+    } catch (e) {
+      CustomSnackbar.error('Error', 'Gagal menghapus layanan');
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

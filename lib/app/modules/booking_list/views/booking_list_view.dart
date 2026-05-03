@@ -35,10 +35,19 @@ class BookingListView extends GetView<BookingListController> {
           ),
 
           actions: [
-            IconButton(
-              onPressed: () => controller.fetchBookings(),
-              icon: const Icon(Icons.refresh, color: Colors.white),
-              tooltip: 'Refresh',
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () => controller.fetchBookings(),
+                  icon: const Icon(Icons.refresh, color: Colors.white),
+                  tooltip: 'Refresh',
+                ),
+                IconButton(
+                  onPressed: () => controller.pickFilterDate(),
+                  icon: const Icon(Icons.filter_list, color: Colors.white),
+                  tooltip: 'Filter',
+                ),
+              ],
             ),
           ],
         ),
@@ -117,11 +126,23 @@ class BookingListView extends GetView<BookingListController> {
       }
 
       // Use controller method for filtering
-      List<BookingsModel> filteredBookings = controller.getBookingsByStatus(
-        status,
-      );
+      List<BookingsModel> filteredBookingStatus = controller
+          .getBookingsByStatus(status);
 
-      if (filteredBookings.isEmpty) {
+      if (controller.selectedFilterData.value != null) {
+        final filterDate = controller.selectedFilterData.value!;
+
+        filteredBookingStatus =
+            filteredBookingStatus.where((booking) {
+              DateTime? bDate = booking.bookingDate;
+              if (bDate == null) return false;
+              return bDate.year == filterDate.year &&
+                  bDate.month == filterDate.month &&
+                  bDate.day == filterDate.day;
+            }).toList();
+      }
+
+      if (filteredBookingStatus.isEmpty) {
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -169,10 +190,10 @@ class BookingListView extends GetView<BookingListController> {
             right: 24,
             bottom: 40,
           ),
-          itemCount: filteredBookings.length,
+          itemCount: filteredBookingStatus.length,
           separatorBuilder: (context, index) => const SizedBox(height: 16),
           itemBuilder: (context, index) {
-            final booking = filteredBookings[index];
+            final booking = filteredBookingStatus[index];
             return _buildBookingCard(booking, status, icon, color);
           },
         ),
@@ -437,6 +458,10 @@ class BookingListView extends GetView<BookingListController> {
                 '${controller.formatEstimatedTime(booking)} WIB',
               ),
               _buildDetailRow(
+                'Pembayaran DP',
+                controller.getPaymentStatus(booking.id),
+              ),
+              _buildDetailRow(
                 'Total Biaya',
                 controller.formatPrice(booking.totalPrice),
               ),
@@ -544,11 +569,6 @@ class BookingListView extends GetView<BookingListController> {
       case 'Sedang Dikerjakan':
         actions = [
           ActionSheetItem(
-            title: 'Hubungi Teknisi',
-            icon: Icons.phone_rounded,
-            onPressed: () => controller.contactTechnician(booking),
-          ),
-          ActionSheetItem(
             title: 'Tambah Progress',
             icon: Icons.timeline_rounded,
             onPressed: () => controller.addProgress(booking),
@@ -568,6 +588,11 @@ class BookingListView extends GetView<BookingListController> {
             title: 'Konfirmasi Pengambilan',
             icon: Icons.check_circle_rounded,
             onPressed: () => controller.confirmPickup(booking),
+          ),
+          ActionSheetItem(
+            title: 'Lihat Riwayat Servis',
+            icon: Icons.check_circle_rounded,
+            onPressed: () => controller.moveToRiwayatServis(booking),
           ),
         ];
         break;

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speedlab_admin/app/utils/theme/color_theme.dart';
 import 'package:speedlab_admin/app/utils/widget/custom_modal.dart';
+import 'package:speedlab_admin/app/utils/widget/info_card.dart';
 
 import '../controllers/service_list_controller.dart';
 
@@ -35,7 +36,14 @@ class ServiceListView extends GetView<ServiceListController> {
             letterSpacing: -0.5,
           ),
         ),
-        centerTitle: true,
+        // centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () => controller.moveToAddService(),
+            icon: const Icon(Icons.add),
+            tooltip: "Tambah Layanan",
+          ),
+        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -72,6 +80,12 @@ class ServiceListView extends GetView<ServiceListController> {
           ),
         );
       }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => controller.moveToAddService(),
+        child: Icon(Icons.add),
+        backgroundColor: ColorTheme.darkBgPrimary,
+        foregroundColor: ColorTheme.neonYellow,
+      ),
     );
   }
 
@@ -122,27 +136,62 @@ class ServiceListView extends GetView<ServiceListController> {
                       "${service.estimatedDuration ?? 0} Menit",
                     ),
                     const SizedBox(height: 30),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => controller.moveToAddService(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColorTheme.primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed:
+                                () => controller.moveToEditService(service),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ColorTheme.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Text(
+                              "Edit",
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
                           ),
                         ),
-                        child: Text(
-                          "Ubah Layanan",
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              ConfirmationDialog.show(
+                                title: "Hapus Layanan",
+                                message:
+                                    "Apakah Anda yakin ingin menghapus layanan ini?",
+                                onConfirm: () {
+                                  controller.deleteService(service.id);
+                                },
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Text(
+                              "Hapus",
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),

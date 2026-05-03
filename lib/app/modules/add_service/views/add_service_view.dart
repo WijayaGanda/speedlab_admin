@@ -82,7 +82,7 @@ class AddServiceView extends GetView<AddServiceController> {
                             )
                             : CustomButton(
                               icon: Icons.app_registration,
-                              text: "Daftar",
+                              text: "Tambah Layanan",
                               onPressed: () {
                                 controller.addService();
                               },

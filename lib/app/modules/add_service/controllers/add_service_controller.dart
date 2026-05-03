@@ -1,11 +1,16 @@
 import 'package:get/get.dart';
 import 'package:speedlab_admin/app/data/providers/service_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:speedlab_admin/app/modules/dashboard/controllers/dashboard_controller.dart';
+import 'package:speedlab_admin/app/utils/widget/custom_modal.dart';
+import 'package:speedlab_admin/app/utils/widget/custom_snackbar.dart';
 
 class AddServiceController extends GetxController {
   final ServiceProvider provider;
 
   AddServiceController({required this.provider});
+
+  final dashController = Get.find<DashboardController>();
 
   var isLoading = false.obs;
   var nameCtrl = TextEditingController();
@@ -19,6 +24,16 @@ class AddServiceController extends GetxController {
   }
 
   Future<void> addService() async {
+    if (nameCtrl.text.isEmpty ||
+        deskripsiCtrl.text.isEmpty ||
+        hargaCtrl.text.isEmpty ||
+        estimatedDurationCtrl.text.isEmpty) {
+      CustomModal.showErrorDialog(
+        title: 'Error',
+        message: 'Semua field harus diisi',
+      );
+      return;
+    }
     try {
       isLoading.value = true;
       final response = await provider.createServices({
@@ -28,13 +43,13 @@ class AddServiceController extends GetxController {
         'estimatedDuration': estimatedDurationCtrl.text,
       });
       if (response.isOk) {
-        Get.snackbar('Success', 'Layanan berhasil ditambahkan');
-        Get.back();
+        CustomSnackbar.success('Success', 'Layanan berhasil ditambahkan');
+        Get.offAllNamed('/dashboard');
       } else {
-        Get.snackbar('Error', 'Gagal menambahkan layanan');
+        CustomSnackbar.error('Error', 'Gagal menambahkan layanan');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal menambahkan layanan');
+      CustomSnackbar.error('Error', 'Gagal menambahkan layanan');
     } finally {
       isLoading.value = false;
     }

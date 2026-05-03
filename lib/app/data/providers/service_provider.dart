@@ -9,4 +9,12 @@ class ServiceProvider extends ApiService {
   Future<Response> createServices(Map<String, dynamic> data) async {
     return await post('api/services', data);
   }
+
+  Future<Response> updateServices(String id, Map<String, dynamic> data) async {
+    return await put('api/services/$id', data);
+  }
+
+  Future<Response> deleteService(String id) async {
+    return await delete('api/services/$id');
+  }
 }

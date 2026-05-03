@@ -11,6 +11,7 @@ abstract class Routes {
   static const SERVICE_LIST = _Paths.SERVICE_LIST;
   static const ADD_SERVICE = _Paths.ADD_SERVICE;
   static const EDIT_SERVICE = _Paths.EDIT_SERVICE;
+  static const RIWAYAT_SERVIS = _Paths.RIWAYAT_SERVIS;
 }
 
 abstract class _Paths {
@@ -23,4 +24,5 @@ abstract class _Paths {
   static const SERVICE_LIST = '/service-list';
   static const ADD_SERVICE = '/add-service';
   static const EDIT_SERVICE = '/edit-service';
+  static const RIWAYAT_SERVIS = '/riwayat-servis';
 }

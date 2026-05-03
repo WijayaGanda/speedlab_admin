@@ -1,15 +1,19 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:speedlab_admin/app/data/models/user_model.dart';
 import 'package:speedlab_admin/app/data/providers/auth_provider.dart';
+import 'package:speedlab_admin/app/data/providers/notif_provider.dart';
 import 'package:speedlab_admin/app/data/services/auth_service.dart';
+import 'package:speedlab_admin/app/data/services/fcm_service.dart';
 import 'package:speedlab_admin/app/utils/widget/custom_modal.dart';
 import 'package:speedlab_admin/app/utils/widget/custom_snackbar.dart';
 
 class LoginController extends GetxController {
   final AuthProvider provider;
+  final NotifProvider notifProvider;
 
-  LoginController({required this.provider});
+  LoginController({required this.provider, required this.notifProvider});
 
   var isLoading = false.obs;
   var isVisible = true.obs;
@@ -38,6 +42,15 @@ class LoginController extends GetxController {
           "Halo",
           "Selamat datang ${loginres.user?.name ?? 'User'}!",
         );
+        String? fcmToken = await FirebaseMessaging.instance.getToken();
+
+        if (fcmToken != null) {
+          await Get.find<FCMService>().sendFcmTokenToBackend(fcmToken);
+          debugPrint("🔔 Token FCM berhasil didaftarkan ke backend.");
+        } else {
+          debugPrint("🔔 Gagal mendapatkan token FCM untuk registrasi.");
+        }
+
         Get.offAllNamed('/dashboard');
       }
     } finally {

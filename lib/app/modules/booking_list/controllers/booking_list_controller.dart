@@ -2,6 +2,7 @@ import 'package:action_slider/action_slider.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speedlab_admin/app/data/models/bookings_model.dart';
+import 'package:speedlab_admin/app/data/models/payments_model.dart';
 import 'package:speedlab_admin/app/data/models/service_history_model.dart';
 import 'package:speedlab_admin/app/data/providers/bookings_provider.dart';
 import 'package:speedlab_admin/app/data/providers/service_history_provider.dart';
@@ -23,13 +24,43 @@ class BookingListController extends GetxController {
 
   var bookings = <BookingsModel>[].obs;
   var serviceHistory = <ServiceHistoryModel>[].obs;
+  var paymentsResponse = <PaymentResponse>[].obs;
+  var paymentsStatus = <String, PaymentStatusResponse>{}.obs;
   var isLoading = false.obs;
   var isProcessingPayment = false.obs;
+
+  var selectedFilterData = Rx<DateTime?>(null);
 
   @override
   void onInit() {
     super.onInit();
     fetchBookings();
+  }
+
+  List<BookingsModel> get filteredBookings {
+    if (selectedFilterData.value == null) {
+      return bookings;
+    } else {
+      return bookings.where((booking) {
+        final bookingDate = booking.bookingDate;
+        if (bookingDate == null) return false;
+        return bookingDate.year == selectedFilterData.value!.year &&
+            bookingDate.month == selectedFilterData.value!.month &&
+            bookingDate.day == selectedFilterData.value!.day;
+      }).toList();
+    }
+  }
+
+  Future<void> pickFilterDate() async {
+    DateTime? picked = await showDatePicker(
+      context: Get.context!,
+      initialDate: selectedFilterData.value ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      selectedFilterData.value = picked;
+    }
   }
 
   Future<void> fetchBookings() async {
@@ -130,6 +161,10 @@ class BookingListController extends GetxController {
   //   }
   // }
 
+  void moveToRiwayatServis(BookingsModel booking) {
+    Get.toNamed("/riwayat-servis", arguments: booking);
+  }
+
   // ========== FILTERING METHODS ==========
   List<BookingsModel> getBookingsByStatus(String status) {
     return bookings.where((booking) {
@@ -183,6 +218,39 @@ class BookingListController extends GetxController {
     final dateFormat = DateFormat('dd MMM yyyy');
     final timeFormat = DateFormat('HH:mm');
     return '${dateFormat.format(booking.bookingDate!)}, ${timeFormat.format(booking.bookingTime!)} WIB';
+  }
+
+  String getPaymentStatus(String? bookingId) {
+    if (bookingId == null) return '-';
+    final paymentStatus = paymentsStatus[bookingId];
+    if (paymentStatus == null) return '-';
+    return formatPaymentStatus(paymentStatus.transactionStatus);
+  }
+
+  PaymentStatusResponse? getPaymentStatusObject(String? bookingId) {
+    if (bookingId == null) return null;
+    return paymentsStatus[bookingId];
+  }
+
+  String formatPaymentStatus(String? status) {
+    if (status == null || status.isEmpty) return '-';
+
+    switch (status.toLowerCase()) {
+      case 'settlement':
+        return 'Sudah Dibayar';
+      case 'pending':
+        return 'Menunggu Pembayaran';
+      case 'expire':
+        return 'Pembayaran Kadaluarsa';
+      case 'cancel':
+        return 'Pembayaran Dibatalkan';
+      case 'deny':
+        return 'Pembayaran Ditolak';
+      case 'failure':
+        return 'Pembayaran Gagal';
+      default:
+        return status;
+    }
   }
 
   String formatPrice(int? price) {

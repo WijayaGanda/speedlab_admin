@@ -38,6 +38,7 @@ class ServiceHistoryModel {
   final Map<String, dynamic>? userId;
   final Map<String, dynamic>? motorcycleId;
   final List<dynamic>? serviceIds;
+  final List<dynamic>? workPhotos;
 
   final String? diagnosis;
   final String? workDone;
@@ -68,6 +69,7 @@ class ServiceHistoryModel {
     this.notes,
     this.status,
     this.complaint,
+    this.workPhotos,
   });
 
   factory ServiceHistoryModel.fromJson(Map<String, dynamic> json) {
@@ -102,6 +104,7 @@ class ServiceHistoryModel {
       notes: json['notes'],
       status: json['status'],
       complaint: json['complaint'],
+      workPhotos: json['workPhotos'],
     );
   }
 
@@ -126,6 +129,7 @@ class ServiceHistoryModel {
       'notes': notes,
       'status': status,
       'complaint': complaint,
+      'workPhotos': workPhotos,
     };
   }
 }

@@ -12,6 +12,8 @@ import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/riwayat_servis/bindings/riwayat_servis_binding.dart';
+import '../modules/riwayat_servis/views/riwayat_servis_view.dart';
 import '../modules/service_history/bindings/service_history_binding.dart';
 import '../modules/service_history/views/service_history_view.dart';
 import '../modules/service_list/bindings/service_list_binding.dart';
@@ -64,6 +66,11 @@ class AppPages {
       name: _Paths.EDIT_SERVICE,
       page: () => const EditServiceView(),
       binding: EditServiceBinding(),
+    ),
+    GetPage(
+      name: _Paths.RIWAYAT_SERVIS,
+      page: () => const RiwayatServisView(),
+      binding: RiwayatServisBinding(),
     ),
   ];
 }
