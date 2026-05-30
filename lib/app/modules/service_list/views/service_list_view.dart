@@ -37,13 +37,6 @@ class ServiceListView extends GetView<ServiceListController> {
           ),
         ),
         // centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () => controller.moveToAddService(),
-            icon: const Icon(Icons.add),
-            tooltip: "Tambah Layanan",
-          ),
-        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -80,11 +73,15 @@ class ServiceListView extends GetView<ServiceListController> {
           ),
         );
       }),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => controller.moveToAddService(),
-        child: Icon(Icons.add),
-        backgroundColor: ColorTheme.darkBgPrimary,
-        foregroundColor: ColorTheme.neonYellow,
+        label: Text(
+          "Tambah Layanan",
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 12),
+        ),
+        icon: const Icon(Icons.add),
+        backgroundColor: ColorTheme.neonYellow,
+        foregroundColor: ColorTheme.darkBgPrimary,
       ),
     );
   }
@@ -110,90 +107,268 @@ class ServiceListView extends GetView<ServiceListController> {
           borderRadius: BorderRadius.circular(20),
           onTap: () {
             CustomModal.showBottomSheet(
-              height: Get.height * 0.65,
+              height: Get.height * 0.8,
               title: service.name ?? "Detail Layanan",
-              content: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24.0,
-                  vertical: 20.0,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildDetailRow("Deskripsi", service.description ?? "-"),
-                    _buildDetailRow(
-                      "Harga",
-                      "Rp ${formatPrice(service.price ?? 0)}",
-                    ),
-                    _buildDetailRow(
-                      "Status",
-                      isActive ? "Tersedia" : "Tidak Tersedia",
-                      isActive,
-                    ),
-                    _buildDetailRow(
-                      "Durasi",
-                      "${service.estimatedDuration ?? 0} Menit",
-                    ),
-                    const SizedBox(height: 30),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed:
-                                () => controller.moveToEditService(service),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: ColorTheme.primary,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+              content: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 20.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed:
+                                  () => controller.moveToEditService(service),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: ColorTheme.primary,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              "Edit",
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                              child: Text(
+                                "Edit",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              ConfirmationDialog.show(
-                                title: "Hapus Layanan",
-                                message:
-                                    "Apakah Anda yakin ingin menghapus layanan ini?",
-                                onConfirm: () {
-                                  controller.deleteService(service.id);
-                                },
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                ConfirmationDialog.show(
+                                  title: "Hapus Layanan",
+                                  message:
+                                      "Apakah Anda yakin ingin menghapus layanan ini?",
+                                  onConfirm: () {
+                                    controller.deleteService(service.id);
+                                  },
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                "Hapus",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
+                      _buildDetailRow("Deskripsi", service.description ?? "-"),
+                      _buildDetailRow(
+                        "Harga",
+                        "Rp ${formatPrice(service.basePrice ?? 0)}",
+                      ),
+                      _buildDetailRow(
+                        "Status",
+                        isActive ? "Tersedia" : "Tidak Tersedia",
+                        isActive,
+                      ),
+                      _buildDetailRow(
+                        "Durasi",
+                        "${service.estimatedDuration ?? 0} Menit",
+                      ),
+                      const SizedBox(height: 24),
+
+                      // ========== VARIANTS SECTION ==========
+                      if (service.variants != null &&
+                          service.variants!.isNotEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Varian',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            ...service.variants!.map((variant) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.blue.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        variant.name,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Modifier: Rp ${formatPrice(variant.priceModifier)}',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 11,
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
+                                      if (variant.description.isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 4,
+                                          ),
+                                          child: Text(
+                                            variant.description,
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 11,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
                               );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              "Hapus",
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
+                            }).toList(),
+                            const SizedBox(height: 16),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
+
+                      // ========== ADDONS SECTION ==========
+                      if (service.availableAddons != null &&
+                          service.availableAddons!.isNotEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Available Addons',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            ...service.availableAddons!.map((addon) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.green.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              addon.name,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  addon.type == 'OPTIONAL'
+                                                      ? Colors.orange
+                                                          .withOpacity(0.2)
+                                                      : Colors.red.withOpacity(
+                                                        0.2,
+                                                      ),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              addon.type,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.w600,
+                                                color:
+                                                    addon.type == 'OPTIONAL'
+                                                        ? Colors.orange[700]
+                                                        : Colors.red[700],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Harga: Rp ${formatPrice(addon.price)}',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 11,
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
+                                      if (addon.description.isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 4,
+                                          ),
+                                          child: Text(
+                                            addon.description,
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 11,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            const SizedBox(height: 16),
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
               ),
             );

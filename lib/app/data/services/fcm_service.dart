@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:speedlab_admin/app/data/providers/notif_provider.dart';
+import 'package:speedlab_admin/app/modules/notification/controllers/notification_controller.dart';
 
 class FCMService extends GetxService {
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
@@ -27,7 +28,7 @@ class FCMService extends GetxService {
     await _registerCurrentToken();
 
     // 3) Foreground message
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       debugPrint('🔔 Foreground message masuk');
       final notif = message.notification;
 
@@ -43,6 +44,10 @@ class FCMService extends GetxService {
           margin: const EdgeInsets.all(15),
           snackPosition: SnackPosition.TOP,
         );
+
+        if (Get.isRegistered<NotificationController>()) {
+          await Get.find<NotificationController>().fetchNotifications();
+        }
       }
     });
 
@@ -126,6 +131,22 @@ class FCMService extends GetxService {
       }
     } catch (e) {
       debugPrint("❌ Error kirim token ke backend: $e");
+    }
+  }
+
+  Future<void> unregisterFcmToken(String fcmToken) async {
+    // if (kIsWeb) return;
+
+    try {
+      final response = await _notifProvider.unregisterFcmToken({
+        'fcmToken': fcmToken,
+      });
+      debugPrint("🔔 Unregistering FCM Token: $fcmToken");
+      if (response.statusCode == 200) {
+        debugPrint("✅ Token FCM berhasil dihapus dari backend");
+      }
+    } catch (e) {
+      debugPrint("❌ Error unregister token: $e");
     }
   }
 }

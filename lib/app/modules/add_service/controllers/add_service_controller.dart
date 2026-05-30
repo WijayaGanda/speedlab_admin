@@ -11,6 +11,7 @@ class AddServiceController extends GetxController {
   AddServiceController({required this.provider});
 
   final dashController = Get.find<DashboardController>();
+  var isWaitable = true.obs;
 
   var isLoading = false.obs;
   var nameCtrl = TextEditingController();
@@ -18,9 +19,93 @@ class AddServiceController extends GetxController {
   var hargaCtrl = TextEditingController();
   var estimatedDurationCtrl = TextEditingController();
 
+  // Variants
+  var variants = RxList<Map<String, dynamic>>([]);
+  var variantNameCtrl = TextEditingController();
+  var variantPriceModifierCtrl = TextEditingController();
+  var variantDescCtrl = TextEditingController();
+
+  // Addons
+  var addons = RxList<Map<String, dynamic>>([]);
+  var addonNameCtrl = TextEditingController();
+  var addonPriceCtrl = TextEditingController();
+  var addonDescCtrl = TextEditingController();
+  var selectedAddonType = 'OPTIONAL'.obs;
+
   @override
   void onInit() {
     super.onInit();
+  }
+
+  @override
+  void onClose() {
+    nameCtrl.dispose();
+    deskripsiCtrl.dispose();
+    hargaCtrl.dispose();
+    estimatedDurationCtrl.dispose();
+    variantNameCtrl.dispose();
+    variantPriceModifierCtrl.dispose();
+    variantDescCtrl.dispose();
+    addonNameCtrl.dispose();
+    addonPriceCtrl.dispose();
+    addonDescCtrl.dispose();
+    super.onClose();
+  }
+
+  void addVariant() {
+    if (variantNameCtrl.text.isEmpty) {
+      CustomModal.showErrorDialog(
+        title: 'Error',
+        message: 'Nama variant harus diisi',
+      );
+      return;
+    }
+
+    variants.add({
+      'variantName': variantNameCtrl.text,
+      'priceModifier': double.tryParse(variantPriceModifierCtrl.text) ?? 0.0,
+      'variantDescription': variantDescCtrl.text,
+    });
+
+    variantNameCtrl.clear();
+    variantPriceModifierCtrl.clear();
+    variantDescCtrl.clear();
+
+    CustomSnackbar.success('Success', 'Variant berhasil ditambahkan');
+  }
+
+  void removeVariant(int index) {
+    variants.removeAt(index);
+    CustomSnackbar.success('Success', 'Variant berhasil dihapus');
+  }
+
+  void addAddon() {
+    if (addonNameCtrl.text.isEmpty) {
+      CustomModal.showErrorDialog(
+        title: 'Error',
+        message: 'Nama addon harus diisi',
+      );
+      return;
+    }
+
+    addons.add({
+      'addonName': addonNameCtrl.text,
+      'price': double.tryParse(addonPriceCtrl.text) ?? 0.0,
+      'type': selectedAddonType.value,
+      'addonDescription': addonDescCtrl.text,
+    });
+
+    addonNameCtrl.clear();
+    addonPriceCtrl.clear();
+    addonDescCtrl.clear();
+    selectedAddonType.value = 'OPTIONAL';
+
+    CustomSnackbar.success('Success', 'Addon berhasil ditambahkan');
+  }
+
+  void removeAddon(int index) {
+    addons.removeAt(index);
+    CustomSnackbar.success('Success', 'Addon berhasil dihapus');
   }
 
   Future<void> addService() async {
@@ -30,26 +115,88 @@ class AddServiceController extends GetxController {
         estimatedDurationCtrl.text.isEmpty) {
       CustomModal.showErrorDialog(
         title: 'Error',
-        message: 'Semua field harus diisi',
+        message: 'Semua field utama harus diisi',
       );
       return;
     }
+
     try {
       isLoading.value = true;
-      final response = await provider.createServices({
+
+      // DEBUG: Print addons sebelum dikirim
+      debugPrint('');
+      debugPrint('╔═══════════════════ DEBUG ADDONS ═══════════════════╗');
+      debugPrint('║ Total Addons: ${addons.length}');
+      for (int i = 0; i < addons.length; i++) {
+        debugPrint('║');
+        debugPrint('║ 🔷 Addon #${i + 1}:');
+        debugPrint('║   - addonName: ${addons[i]['addonName']}');
+        debugPrint('║   - price: ${addons[i]['price']}');
+        debugPrint('║   - type: ${addons[i]['type']}');
+        debugPrint('║   - addonDescription: ${addons[i]['addonDescription']}');
+      }
+      debugPrint('╚═══════════════════════════════════════════════════╝');
+      debugPrint('');
+
+      // DEBUG: Print variants juga untuk comparison
+      debugPrint('╔═══════════════════ DEBUG VARIANTS ═══════════════════╗');
+      debugPrint('║ Total Variants: ${variants.length}');
+      for (int i = 0; i < variants.length; i++) {
+        debugPrint('║');
+        debugPrint('║ 🔹 Variant #${i + 1}:');
+        debugPrint('║   - name: ${variants[i]['name']}');
+        debugPrint('║   - priceModifier: ${variants[i]['priceModifier']}');
+        debugPrint('║   - description: ${variants[i]['description']}');
+      }
+      debugPrint('╚═════════════════════════════════════════════════════╝');
+      debugPrint('');
+
+      final payload = {
         'name': nameCtrl.text,
+        'category': 'REMAP',
+        'basePrice': double.tryParse(hargaCtrl.text) ?? 0.0,
         'description': deskripsiCtrl.text,
-        'price': double.tryParse(hargaCtrl.text) ?? 0.0,
-        'estimatedDuration': estimatedDurationCtrl.text,
-      });
+        'estimatedDuration': int.tryParse(estimatedDurationCtrl.text) ?? 0,
+        'isWaitable': isWaitable.value,
+        'isActive': true,
+        'variants': variants.toList(),
+        'availableAddons': addons.toList(),
+      };
+
+      debugPrint('📤 SENDING PAYLOAD:');
+      debugPrint('$payload');
+      debugPrint('');
+
+      final response = await provider.createFullServices(payload);
+
+      debugPrint('📥 RESPONSE RECEIVED:');
+      debugPrint('Status: ${response.statusCode}');
+      debugPrint('Body: ${response.bodyString}');
+      debugPrint('');
+
       if (response.isOk) {
         CustomSnackbar.success('Success', 'Layanan berhasil ditambahkan');
+        // Clear all data
+        nameCtrl.clear();
+        deskripsiCtrl.clear();
+        hargaCtrl.clear();
+        estimatedDurationCtrl.clear();
+        variants.clear();
+        addons.clear();
         Get.offAllNamed('/dashboard');
       } else {
-        CustomSnackbar.error('Error', 'Gagal menambahkan layanan');
+        debugPrint(
+          '❌ Response Error: ${response.statusCode} - ${response.bodyString}',
+        );
+        CustomSnackbar.error(
+          'Error',
+          'Gagal menambahkan layanan: ${response.statusCode}',
+        );
       }
     } catch (e) {
-      CustomSnackbar.error('Error', 'Gagal menambahkan layanan');
+      debugPrint('❌ Exception occurred: $e');
+      debugPrint('StackTrace: ${StackTrace.current}');
+      CustomSnackbar.error('Error', 'Gagal menambahkan layanan: $e');
     } finally {
       isLoading.value = false;
     }

@@ -323,7 +323,7 @@ class BookingListView extends GetView<BookingListController> {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  'Total: ${controller.formatPrice(booking.totalPrice)}',
+                  'Total: ${controller.formatPrice(booking.totalPrice!.toInt())}',
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -451,7 +451,7 @@ class BookingListView extends GetView<BookingListController> {
               ),
               _buildDetailRow(
                 'Waktu',
-                '${controller.formatTime(booking.bookingTime)} WIB',
+                '${controller.formatTime(booking.bookingTime.toString())} WIB',
               ),
               _buildDetailRow(
                 'Estimasi Selesai',
@@ -463,7 +463,7 @@ class BookingListView extends GetView<BookingListController> {
               ),
               _buildDetailRow(
                 'Total Biaya',
-                controller.formatPrice(booking.totalPrice),
+                controller.formatPrice(booking.totalPrice?.toInt() ?? 0),
               ),
               _buildDetailRow('Status', booking.status ?? '-'),
 

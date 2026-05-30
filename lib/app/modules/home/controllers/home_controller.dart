@@ -1,7 +1,10 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:speedlab_admin/app/data/models/bookings_model.dart';
 import 'package:speedlab_admin/app/data/providers/bookings_provider.dart';
 import 'package:speedlab_admin/app/data/services/auth_service.dart';
+import 'package:speedlab_admin/app/data/services/fcm_service.dart';
+import 'package:flutter/material.dart';
 
 class HomeController extends GetxController {
   final authService = Get.find<AuthService>();
@@ -53,5 +56,33 @@ class HomeController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void walkin() {
+    Get.toNamed('/walkin-customer');
+  }
+
+  void moveToNotifications() async {
+    Get.toNamed('/notification');
+  }
+
+  void logout() async {
+    // 1. Amankan proses FCM dengan try-catch
+    try {
+      final String? fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await Get.find<FCMService>().unregisterFcmToken(fcmToken);
+        debugPrint("🔔 Token FCM berhasil dihapus dari backend.");
+      }
+      await FirebaseMessaging.instance.deleteToken();
+      debugPrint("🗑️ Cache token FCM lokal berhasil dihancurkan.");
+    } catch (e) {
+      // Jika error SERVICE_NOT_AVAILABLE muncul, sistem akan masuk ke sini
+      debugPrint("⚠️ Gagal memproses FCM saat logout: $e");
+    }
+
+    // 2. Proses logout lokal dan navigasi AKAN TETAP JALAN meskipun FCM error
+    authService.logout();
+    Get.offAllNamed('/login');
   }
 }

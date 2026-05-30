@@ -95,7 +95,7 @@ class ServiceHistoryController extends GetxController {
 
   int get finalPrice {
     final bookingPrice = selectedBooking.value?.totalPrice ?? 0;
-    return bookingPrice + totalHargaSpareParts;
+    return bookingPrice.toInt() + totalHargaSpareParts;
   }
 
   String get serviceHistoryButtonText {

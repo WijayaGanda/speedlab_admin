@@ -26,7 +26,7 @@ class EditServiceController extends GetxController {
         text: service.value?.description ?? '',
       );
       hargaCtrl = TextEditingController(
-        text: service.value?.price.toString() ?? '',
+        text: service.value?.basePrice.toString() ?? '',
       );
       estimatedDurationCtrl = TextEditingController(
         text: service.value?.estimatedDuration.toString() ?? '',
@@ -48,8 +48,8 @@ class EditServiceController extends GetxController {
           .updateServices(service.value!.id.toString(), {
             'name': nameCtrl.text,
             'description': deskripsiCtrl.text,
-            'price': double.tryParse(hargaCtrl.text) ?? 0.0,
-            'estimatedDuration': estimatedDurationCtrl.text,
+            'basePrice': double.tryParse(hargaCtrl.text) ?? 0.0,
+            'estimatedDuration': int.tryParse(estimatedDurationCtrl.text) ?? 0,
           });
       if (response.isOk) {
         CustomSnackbar.success('Success', 'Layanan berhasil diperbarui');

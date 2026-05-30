@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:speedlab_admin/app/data/providers/notif_provider.dart';
+import 'package:speedlab_admin/app/modules/notification/controllers/notification_controller.dart';
 import 'package:speedlab_admin/app/utils/theme/color_theme.dart';
 
+// import '../../../routes/app_pages.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -47,26 +50,120 @@ class HomeView extends GetView<HomeController> {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 3),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: GestureDetector(
+              onTap: () {
+                controller.moveToNotifications();
+              },
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const IconButton(
+                      onPressed:
+                          null, // Dinonaktifkan karena di-handle GestureDetector
+                      icon: Icon(Icons.notifications, color: Colors.black),
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Obx(() {
+                      if (Get.put(
+                            NotificationController(
+                              provider: Get.find<NotifProvider>(),
+                            ),
+                          ).unreadCount >
+                          0) {
+                        return Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                          child: Text(
+                            "${Get.put(NotificationController(provider: Get.find<NotifProvider>())).unreadCount}",
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    }),
                   ),
                 ],
               ),
-              child: Obx(
-                () => CircleAvatar(
-                  radius: 22,
-                  backgroundColor: Colors.grey[200],
-                  backgroundImage: NetworkImage(
-                    controller.authService.user.value?.avatar ??
-                        "https://ui-avatars.com/api/?name=${controller.authService.user.value?.name ?? 'Admin'}&background=FFD700&color=000",
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: PopupMenuButton<String>(
+              // Mengatur aksi ketika menu 'logout' dipilih
+              onSelected: (value) {
+                if (value == 'logout') {
+                  controller.logout();
+                }
+              },
+              // Membuat daftar menu (hanya berisi Logout)
+              itemBuilder:
+                  (context) => [
+                    const PopupMenuItem(
+                      value: 'logout',
+                      child: Row(
+                        children: [
+                          Icon(Icons.logout, color: Colors.red, size: 20),
+                          SizedBox(width: 10),
+                          Text(
+                            'Keluar',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+              // UI Avatar kamu dipindahkan ke dalam property 'child'
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Obx(
+                  () => CircleAvatar(
+                    radius: 22,
+                    backgroundColor: Colors.grey[200],
+                    backgroundImage: NetworkImage(
+                      (controller.authService.user.value?.avatar?.startsWith(
+                                'http',
+                              ) ==
+                              true)
+                          ? controller.authService.user.value!.avatar!
+                          : "https://ui-avatars.com/api/?name=${controller.authService.user.value?.name ?? 'User'}&background=FFD700&color=000",
+                    ),
                   ),
                 ),
               ),
@@ -235,6 +332,20 @@ class HomeView extends GetView<HomeController> {
           ),
         );
       }),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: () => controller.walkin(),
+      //   backgroundColor: ColorTheme.neonYellow,
+      //   elevation: 8,
+      //   label: Text(
+      //     'Daftarkan Pelanggan',
+      //     style: GoogleFonts.poppins(
+      //       fontSize: 12,
+      //       fontWeight: FontWeight.w600,
+      //       color: Colors.black,
+      //     ),
+      //   ),
+      //   icon: const Icon(Icons.person_add, color: Colors.black),
+      // ),
     );
   }
 
@@ -259,11 +370,7 @@ class HomeView extends GetView<HomeController> {
           Positioned(
             right: -10,
             bottom: -5,
-            child: Icon(
-              icon,
-              size: 60,
-              color: color.withOpacity(0.08),
-            ),
+            child: Icon(icon, size: 60, color: color.withOpacity(0.08)),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),

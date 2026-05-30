@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:speedlab_admin/app/utils/theme/color_theme.dart';
 import 'package:speedlab_admin/app/utils/widget/custom_button.dart';
 import 'package:speedlab_admin/app/utils/widget/custom_header.dart';
 import 'package:speedlab_admin/app/utils/widget/custom_textfield.dart';
@@ -33,7 +34,7 @@ class EditServiceView extends GetView<EditServiceController> {
             CustomHeader(
               title: "Silahkan Ubah Layanan",
               subtitle: "Masukkan Data dengan benar",
-              icon: Icon(Icons.build, size: 48, color: Colors.white),
+              icon: Icon(Icons.build, size: 30, color: ColorTheme.neonYellow),
             ),
             Padding(
               padding: const EdgeInsets.all(20.0),

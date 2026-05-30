@@ -12,6 +12,9 @@ abstract class Routes {
   static const ADD_SERVICE = _Paths.ADD_SERVICE;
   static const EDIT_SERVICE = _Paths.EDIT_SERVICE;
   static const RIWAYAT_SERVIS = _Paths.RIWAYAT_SERVIS;
+  static const WALKIN_CUSTOMER = _Paths.WALKIN_CUSTOMER;
+  static const KLAIM_GARANSI_LIST = _Paths.KLAIM_GARANSI_LIST;
+  static const NOTIFICATION = _Paths.NOTIFICATION;
 }
 
 abstract class _Paths {
@@ -25,4 +28,7 @@ abstract class _Paths {
   static const ADD_SERVICE = '/add-service';
   static const EDIT_SERVICE = '/edit-service';
   static const RIWAYAT_SERVIS = '/riwayat-servis';
+  static const WALKIN_CUSTOMER = '/walkin-customer';
+  static const KLAIM_GARANSI_LIST = '/klaim-garansi-list';
+  static const NOTIFICATION = '/notification';
 }

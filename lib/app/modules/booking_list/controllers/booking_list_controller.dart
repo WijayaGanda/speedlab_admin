@@ -200,15 +200,40 @@ class BookingListController extends GetxController {
   }
 
   String getServicesInfo(BookingsModel booking) {
-    if (booking.serviceIds == null || booking.serviceIds!.isEmpty) return '';
-
-    List<String> serviceNames = [];
-    for (var service in booking.serviceIds!) {
-      if (service is Map && service['name'] != null) {
-        serviceNames.add(service['name']);
-      }
+    if (booking.bookingDetails == null || booking.bookingDetails!.isEmpty) {
+      return '';
     }
-    return serviceNames.join(', ');
+
+    List<String> serviceDetails = [];
+    for (var detail in booking.bookingDetails!) {
+      String serviceName = detail.serviceName ?? '';
+
+      // 1. Ambil Variant
+      String variant = detail.selectedVariant ?? '';
+      String variantStr = variant.isNotEmpty ? ' ($variant)' : '';
+
+      // 2. Ambil Addons (Trik Baru!)
+      String addonsStr = '';
+      if (detail.selectedAddons != null && detail.selectedAddons!.isNotEmpty) {
+        // Ambil semua nama addon, gabungkan dengan koma
+        List<String> addonNames =
+            detail.selectedAddons!
+                .map((addon) => addon.name ?? '')
+                .where((name) => name.isNotEmpty)
+                .toList();
+
+        if (addonNames.isNotEmpty) {
+          // Format tampilannya, misal: " [+ Dyno Rental, Cuci Motor]"
+          addonsStr = ' [+ ${addonNames.join(', ')}]';
+        }
+      }
+
+      // 3. Gabungkan Semuanya: Nama Service + Variant + Addons
+      serviceDetails.add('$serviceName$variantStr$addonsStr');
+    }
+
+    // Kembalikan hasilnya. (Pakai '\n' agar kalau layanannya banyak, dia turun ke baris baru biar rapi)
+    return serviceDetails.join('\n');
   }
 
   // ========== FORMATTING METHODS ==========
@@ -216,8 +241,7 @@ class BookingListController extends GetxController {
     if (booking.bookingDate == null || booking.bookingTime == null) return '';
 
     final dateFormat = DateFormat('dd MMM yyyy');
-    final timeFormat = DateFormat('HH:mm');
-    return '${dateFormat.format(booking.bookingDate!)}, ${timeFormat.format(booking.bookingTime!)} WIB';
+    return '${dateFormat.format(booking.bookingDate!)}, ${booking.bookingTime!} WIB';
   }
 
   String getPaymentStatus(String? bookingId) {
@@ -264,9 +288,28 @@ class BookingListController extends GetxController {
   }
 
   String formatEstimatedTime(BookingsModel booking) {
-    if (booking.bookingTime == null) return '-';
-    final estimated = booking.bookingTime!.add(const Duration(hours: 2));
-    return DateFormat('HH:mm').format(estimated);
+    if (booking.bookingTime == null || booking.bookingDate == null) return '-';
+
+    try {
+      final timeParts = booking.bookingTime!.split(':');
+      if (timeParts.length != 2) return '-';
+
+      final hour = int.tryParse(timeParts[0]) ?? 0;
+      final minute = int.tryParse(timeParts[1]) ?? 0;
+
+      DateTime bookingDateTime = DateTime(
+        booking.bookingDate!.year,
+        booking.bookingDate!.month,
+        booking.bookingDate!.day,
+        hour,
+        minute,
+      );
+
+      final estimated = bookingDateTime.add(const Duration(hours: 2));
+      return DateFormat('HH:mm').format(estimated);
+    } catch (e) {
+      return '-';
+    }
   }
 
   String formatDate(DateTime? date) {
@@ -274,9 +317,11 @@ class BookingListController extends GetxController {
     return DateFormat('dd MMM yyyy').format(date);
   }
 
-  String formatTime(DateTime? time) {
+  String formatTime(dynamic time) {
     if (time == null) return '-';
-    return DateFormat('HH:mm').format(time);
+    if (time is DateTime) return DateFormat('HH:mm').format(time);
+    if (time is String) return time;
+    return '-';
   }
 
   // ========== ACTION METHODS ==========

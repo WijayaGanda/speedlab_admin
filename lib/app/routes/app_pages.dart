@@ -10,14 +10,20 @@ import '../modules/edit_service/bindings/edit_service_binding.dart';
 import '../modules/edit_service/views/edit_service_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
+import '../modules/klaim_garansi_list/bindings/klaim_garansi_list_binding.dart';
+import '../modules/klaim_garansi_list/views/klaim_garansi_list_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/notification/bindings/notification_binding.dart';
+import '../modules/notification/views/notification_view.dart';
 import '../modules/riwayat_servis/bindings/riwayat_servis_binding.dart';
 import '../modules/riwayat_servis/views/riwayat_servis_view.dart';
 import '../modules/service_history/bindings/service_history_binding.dart';
 import '../modules/service_history/views/service_history_view.dart';
 import '../modules/service_list/bindings/service_list_binding.dart';
 import '../modules/service_list/views/service_list_view.dart';
+import '../modules/walkin-customer/bindings/walkin_customer_binding.dart';
+import '../modules/walkin-customer/views/walkin_customer_view.dart';
 
 part 'app_routes.dart';
 
@@ -71,6 +77,21 @@ class AppPages {
       name: _Paths.RIWAYAT_SERVIS,
       page: () => const RiwayatServisView(),
       binding: RiwayatServisBinding(),
+    ),
+    GetPage(
+      name: _Paths.WALKIN_CUSTOMER,
+      page: () => const WalkinCustomerView(),
+      binding: WalkinCustomerBinding(),
+    ),
+    GetPage(
+      name: _Paths.KLAIM_GARANSI_LIST,
+      page: () => const KlaimGaransiListView(),
+      binding: KlaimGaransiListBinding(),
+    ),
+    GetPage(
+      name: _Paths.NOTIFICATION,
+      page: () => const NotificationView(),
+      binding: NotificationBinding(),
     ),
   ];
 }
