@@ -20,7 +20,7 @@ class LoginController extends GetxController {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void login() async {
+  Future<void> login() async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       CustomModal.showErrorDialog(
         title: "Informasi",
@@ -42,13 +42,17 @@ class LoginController extends GetxController {
           "Halo",
           "Selamat datang ${loginres.user?.name ?? 'User'}!",
         );
-        String? fcmToken = await FirebaseMessaging.instance.getToken();
+        try {
+          String? fcmToken = await FirebaseMessaging.instance.getToken();
 
-        if (fcmToken != null) {
-          await Get.find<FCMService>().sendFcmTokenToBackend(fcmToken);
-          debugPrint("🔔 Token FCM berhasil didaftarkan ke backend.");
-        } else {
-          debugPrint("🔔 Gagal mendapatkan token FCM untuk registrasi.");
+          if (fcmToken != null) {
+            await Get.find<FCMService>().sendFcmTokenToBackend(fcmToken);
+            debugPrint("🔔 Token FCM berhasil didaftarkan ke backend.");
+          } else {
+            debugPrint("🔔 Gagal mendapatkan token FCM untuk registrasi.");
+          }
+        } catch (e) {
+          debugPrint("Error during post-login operations: $e");
         }
 
         Get.offAllNamed('/dashboard');

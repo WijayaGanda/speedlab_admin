@@ -584,24 +584,20 @@ class BookingListView extends GetView<BookingListController> {
         break;
       case 'Selesai':
         actions = [
-          ActionSheetItem(
-            title: 'Konfirmasi Pengambilan',
-            icon: Icons.check_circle_rounded,
-            onPressed: () => controller.confirmPickup(booking),
-          ),
+          // ActionSheetItem(
+          //   title: 'Konfirmasi Pengambilan',
+          //   icon: Icons.check_circle_rounded,
+          //   onPressed: () => controller.confirmPickup(booking),
+          // ),
           ActionSheetItem(
             title: 'Lihat Riwayat Servis',
             icon: Icons.check_circle_rounded,
             onPressed: () => controller.moveToRiwayatServis(booking),
           ),
-        ];
-        break;
-      case 'Diambil':
-        actions = [
           ActionSheetItem(
-            title: 'Beri Rating',
-            icon: Icons.star_rounded,
-            onPressed: () => controller.rateService(booking),
+            title: 'Unduh Invoice',
+            icon: Icons.download_rounded,
+            onPressed: () => controller.downloadInvoice(booking),
           ),
         ];
         break;

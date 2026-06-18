@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/color_theme.dart';
 
 class CustomModal {
+  static bool isTest = false;
   static void showBottomSheet({
     required Widget content,
     String? title,
@@ -415,6 +416,10 @@ class CustomModal {
     VoidCallback? onConfirm,
     bool isDismissible = true,
   }) {
+    if (isTest) {
+      debugPrint("TEST MODE ERROR DIALOG: $title - $message");
+      return;
+    }
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

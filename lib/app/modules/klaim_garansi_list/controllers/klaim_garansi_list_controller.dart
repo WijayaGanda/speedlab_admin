@@ -31,10 +31,10 @@ class KlaimGaransiListController extends GetxController {
         final warrantiesResponse = WarrantyResponse.fromJson(response.body);
         warranties.value = warrantiesResponse.data ?? [];
       } else {
-        Get.snackbar('Error', 'Gagal memuat klaim garansi');
+        CustomSnackbar.error('Error', 'Gagal memuat klaim garansi');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal memuat klaim garansi');
+      CustomSnackbar.error('Error', 'Gagal memuat klaim garansi');
     } finally {
       isLoading.value = false;
     }

@@ -6,6 +6,8 @@ import 'package:speedlab_admin/app/data/models/payments_model.dart';
 import 'package:speedlab_admin/app/data/models/service_history_model.dart';
 import 'package:speedlab_admin/app/data/providers/bookings_provider.dart';
 import 'package:speedlab_admin/app/data/providers/service_history_provider.dart';
+import 'package:speedlab_admin/app/data/services/auth_service.dart';
+import 'package:speedlab_admin/app/utils/helper/pdf_helper.dart';
 import 'package:speedlab_admin/app/utils/theme/color_theme.dart';
 import 'package:speedlab_admin/app/utils/widget/custom_modal.dart';
 import 'package:speedlab_admin/app/utils/widget/custom_snackbar.dart';
@@ -16,10 +18,12 @@ import 'package:flutter/material.dart';
 class BookingListController extends GetxController {
   final BookingsProvider provider;
   final ServiceHistoryProvider serviceHistoryProvider;
+  final AuthService authService;
 
   BookingListController({
     required this.provider,
     required this.serviceHistoryProvider,
+    required this.authService,
   });
 
   var bookings = <BookingsModel>[].obs;
@@ -96,10 +100,10 @@ class BookingListController extends GetxController {
       } else {
         String errorMsg =
             response.body?['message'] ?? "Gagal memperbarui status booking";
-        Get.snackbar("Error API (${response.statusCode})", errorMsg);
+        CustomSnackbar.error("Error API (${response.statusCode})", errorMsg);
       }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal memperbarui status booking');
+      CustomSnackbar.error('Error', 'Gagal memperbarui status booking');
     } finally {
       isLoading.value = false;
     }
@@ -115,10 +119,10 @@ class BookingListController extends GetxController {
       } else {
         String errorMsg =
             response.body?['message'] ?? "Gagal membatalkan booking";
-        Get.snackbar("Error API (${response.statusCode})", errorMsg);
+        CustomSnackbar.error("Error API (${response.statusCode})", errorMsg);
       }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal membatalkan booking');
+      CustomSnackbar.error('Error', 'Gagal membatalkan booking');
     } finally {
       isLoading.value = false;
     }
@@ -128,7 +132,7 @@ class BookingListController extends GetxController {
   //   debugPrint("=== ID BOOKING YANG MAU DIBAYAR: $id ===");
 
   //   if (id == null || id.isEmpty) {
-  //     Get.snackbar("Error", "ID Booking tidak ditemukan!");
+  //     CustomSnackbar.error("Error", "ID Booking tidak ditemukan!");
   //     return; // Hentikan fungsi jika ID kosong
   //   }
   //   isProcessingPayment.value = true;
@@ -580,37 +584,127 @@ class BookingListController extends GetxController {
     );
   }
 
-  //   void downloadInvoice(BookingsModel booking) {
-  //     Get.back();
-  //     // Get.snackbar(
-  //     //   'Info',
-  //     //   'Mengunduh invoice untuk booking ${formatBookingId(booking.id)}...',
-  //     //   snackPosition: SnackPosition.BOTTOM,
-  //     //   backgroundColor: Colors.blue[100],
-  //     //   colorText: Colors.blue[800],
-  //     // );
-  //     PdfHelper.generateAndDownloadInvoice(
-  //       bookingId: booking.id ?? '-',
-  //       customerName: authService.user.value?.name ?? 'Pelanggan Speedlab',
-  //       status: booking.status ?? '-',
-  //       totalAmount: booking.totalPrice ?? 0,
-  //       date: booking.bookingDate?.toLocal().toString().split(' ')[0] ?? '-',
-  //       servicesName:
-  //           booking.serviceIds != null
-  //               ? booking.serviceIds!
-  //                   .map(
-  //                     (s) =>
-  //                         s is Map && s['name'] != null ? s['name'] : 'Layanan',
-  //                   )
-  //                   .toList()
-  //               : ['Layanan'],
-  //       servicesPrice:
-  //           booking.serviceIds != null
-  //               ? booking.serviceIds!
-  //                   .map((s) => s is Map && s['price'] != null ? s['price'] : 0)
-  //                   .toList()
-  //               : [0],
-  //     );
-  //   }
-  // }
+  Future<void> fetchServiceHistory(String bookingId) async {
+    isLoading.value = true;
+    try {
+      final response = await serviceHistoryProvider.getServiceHistory(
+        bookingId,
+      );
+      if (response.isOk) {
+        final serviceHistoryResponse = ServiceHistoryResponse.fromJson(
+          response.body,
+        );
+        if (serviceHistoryResponse.data != null) {
+          serviceHistory.value = [serviceHistoryResponse.data!];
+          debugPrint("berhasil fetch service history");
+
+          if (serviceHistory.isNotEmpty &&
+              serviceHistory.first.status?.toLowerCase() == 'selesai') {
+            debugPrint("Service history selesai");
+            // disableForm();
+          }
+        } else {
+          serviceHistory.value = [];
+          debugPrint("Service history data kosong");
+        }
+      } else {
+        debugPrint("Gagal fetch service history: ${response.statusCode}");
+        CustomSnackbar.error("Error", "Gagal memuat riwayat servis");
+      }
+    } catch (e) {
+      debugPrint('Error fetching service history: $e');
+      CustomSnackbar.error("Error", "Terjadi kesalahan: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> downloadInvoice(BookingsModel booking) async {
+    try {
+      isLoading.value = true;
+
+      if (booking.id != null) {
+        await fetchServiceHistory(booking.id!);
+      }
+
+      // 1. Ambil data Spareparts
+      List<Map<String, dynamic>> sparePartsList = [];
+      if (serviceHistory.isNotEmpty &&
+          serviceHistory.first.spareParts != null &&
+          serviceHistory.first.spareParts!.isNotEmpty) {
+        sparePartsList =
+            serviceHistory.first.spareParts!
+                .map(
+                  (part) => {
+                    'name': part.name ?? 'Spare Part',
+                    'price': part.price ?? 0,
+                    'quantity': part.quantity ?? 1,
+                  },
+                )
+                .toList();
+      }
+
+      /// 2. EXTRACT LAYANAN DARI bookingDetails (Bukan serviceIds lagi)
+      List<String> finalServiceNames = [];
+      List<int> finalServicePrices = [];
+
+      if (booking.bookingDetails != null &&
+          booking.bookingDetails!.isNotEmpty) {
+        for (var detail in booking.bookingDetails!) {
+          // Baris 1: Nama Layanan (Pakai bullet point)
+          String sName = "- ${detail.serviceName ?? 'Layanan'}";
+          // Baris 2: Varian (Turun ke bawah agak menjorok)
+          if (detail.selectedVariant != null &&
+              detail.selectedVariant!.isNotEmpty) {
+            sName += '\n    Varian: ${detail.selectedVariant}';
+          }
+
+          // Baris 3: Addons (Turun ke bawah agak menjorok)
+          if (detail.selectedAddons != null &&
+              detail.selectedAddons!.isNotEmpty) {
+            List<String> addonNames =
+                detail.selectedAddons!
+                    .map((a) => a.name ?? '')
+                    .where((n) => n.isNotEmpty)
+                    .toList();
+            if (addonNames.isNotEmpty) {
+              sName += '\n    Addons: ${addonNames.join(', ')}';
+            }
+          }
+
+          finalServiceNames.add(sName);
+          finalServicePrices.add(detail.subtotal?.toInt() ?? 0);
+        }
+      } else {
+        // Fallback jika kosong
+        finalServiceNames.add('- Layanan Servis Umum');
+        finalServicePrices.add(booking.servicePrice?.toInt() ?? 0);
+      }
+
+      // 3. Generate PDF
+      await PdfHelper.generateAndDownloadInvoice(
+        bookingId: booking.id ?? '-',
+        customerName:
+            serviceHistory.first.userId!['name'] ?? 'Pelanggan Speedlab',
+        status: booking.status ?? '-',
+        totalAmount: booking.totalPrice?.toInt() ?? 0,
+        date: booking.bookingDate?.toLocal().toString().split(' ')[0] ?? '-',
+        servicesName: finalServiceNames, // ✅ Pakai data yang baru diekstrak
+        servicesPrice: finalServicePrices, // ✅ Pakai data yang baru diekstrak
+        spareParts: sparePartsList.isNotEmpty ? sparePartsList : null,
+        serviceHistoryTotalPrice:
+            serviceHistory.isNotEmpty && serviceHistory.first.totalPrice != null
+                ? serviceHistory.first.totalPrice!
+                : null,
+      );
+
+      Get.back();
+      CustomSnackbar.success("Sukses", "Invoice berhasil diunduh");
+    } catch (e) {
+      CustomSnackbar.error("Error", "Gagal mengunduh invoice: $e");
+      debugPrint('Error download invoice: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

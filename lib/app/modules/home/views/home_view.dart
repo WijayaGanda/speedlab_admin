@@ -79,12 +79,15 @@ class HomeView extends GetView<HomeController> {
                     right: 0,
                     top: 0,
                     child: Obx(() {
-                      if (Get.put(
-                            NotificationController(
-                              provider: Get.find<NotifProvider>(),
-                            ),
-                          ).unreadCount >
-                          0) {
+                      // GUNAKAN Get.find() alih-alih Get.put()
+                      // Pastikan NotificationController sudah di-put di Binding atau main.dart saat aplikasi asli berjalan
+                      final notifController = Get.put<NotificationController>(
+                        NotificationController(
+                          provider: Get.find<NotifProvider>(),
+                        ),
+                      );
+
+                      if (notifController.unreadCount > 0) {
                         return Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
@@ -93,7 +96,7 @@ class HomeView extends GetView<HomeController> {
                             border: Border.all(color: Colors.white, width: 1.5),
                           ),
                           child: Text(
-                            "${Get.put(NotificationController(provider: Get.find<NotifProvider>())).unreadCount}",
+                            "${notifController.unreadCount}", // Pakai variabel notifController
                             style: GoogleFonts.poppins(
                               fontSize: 10,
                               color: Colors.white,

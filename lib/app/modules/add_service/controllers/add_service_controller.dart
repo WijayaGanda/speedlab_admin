@@ -111,7 +111,6 @@ class AddServiceController extends GetxController {
   Future<void> addService() async {
     if (nameCtrl.text.isEmpty ||
         deskripsiCtrl.text.isEmpty ||
-        hargaCtrl.text.isEmpty ||
         estimatedDurationCtrl.text.isEmpty) {
       CustomModal.showErrorDialog(
         title: 'Error',
@@ -122,34 +121,6 @@ class AddServiceController extends GetxController {
 
     try {
       isLoading.value = true;
-
-      // DEBUG: Print addons sebelum dikirim
-      debugPrint('');
-      debugPrint('╔═══════════════════ DEBUG ADDONS ═══════════════════╗');
-      debugPrint('║ Total Addons: ${addons.length}');
-      for (int i = 0; i < addons.length; i++) {
-        debugPrint('║');
-        debugPrint('║ 🔷 Addon #${i + 1}:');
-        debugPrint('║   - addonName: ${addons[i]['addonName']}');
-        debugPrint('║   - price: ${addons[i]['price']}');
-        debugPrint('║   - type: ${addons[i]['type']}');
-        debugPrint('║   - addonDescription: ${addons[i]['addonDescription']}');
-      }
-      debugPrint('╚═══════════════════════════════════════════════════╝');
-      debugPrint('');
-
-      // DEBUG: Print variants juga untuk comparison
-      debugPrint('╔═══════════════════ DEBUG VARIANTS ═══════════════════╗');
-      debugPrint('║ Total Variants: ${variants.length}');
-      for (int i = 0; i < variants.length; i++) {
-        debugPrint('║');
-        debugPrint('║ 🔹 Variant #${i + 1}:');
-        debugPrint('║   - name: ${variants[i]['name']}');
-        debugPrint('║   - priceModifier: ${variants[i]['priceModifier']}');
-        debugPrint('║   - description: ${variants[i]['description']}');
-      }
-      debugPrint('╚═════════════════════════════════════════════════════╝');
-      debugPrint('');
 
       final payload = {
         'name': nameCtrl.text,
@@ -163,16 +134,7 @@ class AddServiceController extends GetxController {
         'availableAddons': addons.toList(),
       };
 
-      debugPrint('📤 SENDING PAYLOAD:');
-      debugPrint('$payload');
-      debugPrint('');
-
       final response = await provider.createFullServices(payload);
-
-      debugPrint('📥 RESPONSE RECEIVED:');
-      debugPrint('Status: ${response.statusCode}');
-      debugPrint('Body: ${response.bodyString}');
-      debugPrint('');
 
       if (response.isOk) {
         CustomSnackbar.success('Success', 'Layanan berhasil ditambahkan');
@@ -185,9 +147,6 @@ class AddServiceController extends GetxController {
         addons.clear();
         Get.offAllNamed('/dashboard');
       } else {
-        debugPrint(
-          '❌ Response Error: ${response.statusCode} - ${response.bodyString}',
-        );
         CustomSnackbar.error(
           'Error',
           'Gagal menambahkan layanan: ${response.statusCode}',

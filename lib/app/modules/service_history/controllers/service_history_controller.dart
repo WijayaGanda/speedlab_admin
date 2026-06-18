@@ -9,6 +9,7 @@ import 'package:speedlab_admin/app/data/models/service_history_model.dart';
 import 'package:speedlab_admin/app/data/providers/service_history_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:speedlab_admin/app/utils/widget/custom_modal.dart';
+import 'package:speedlab_admin/app/utils/widget/custom_snackbar.dart';
 // import 'package:speedlab_admin/app/utils/widget/custom_snackbar.dart';
 
 class ServiceHistoryController extends GetxController {
@@ -196,7 +197,7 @@ class ServiceHistoryController extends GetxController {
 
   Future<void> handleServiceHistory() async {
     if (selectedBooking.value == null) {
-      Get.snackbar('Error', 'No booking selected');
+      CustomSnackbar.error('Error', 'No booking selected');
       return;
     }
 
@@ -293,17 +294,23 @@ class ServiceHistoryController extends GetxController {
 
   Future<void> confirmationServiceHistory() async {
     if (selectedBooking.value == null) {
-      Get.snackbar('Error', 'No booking selected');
+      CustomSnackbar.error('Error', 'No booking selected');
       return;
     }
 
     if (serviceHistory.isEmpty) {
-      Get.snackbar('Error', 'Tidak ada service history untuk dikonfirmasi');
+      CustomSnackbar.error(
+        'Error',
+        'Tidak ada service history untuk dikonfirmasi',
+      );
       return;
     }
 
     if (warrantyExpired.value == null) {
-      Get.snackbar('Error', 'Silakan pilih durasi garansi terlebih dahulu');
+      CustomSnackbar.error(
+        'Error',
+        'Silakan pilih durasi garansi terlebih dahulu',
+      );
       return;
     }
 

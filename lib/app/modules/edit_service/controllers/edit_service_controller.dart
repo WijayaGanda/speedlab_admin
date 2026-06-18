@@ -39,7 +39,7 @@ class EditServiceController extends GetxController {
         deskripsiCtrl.text.isEmpty ||
         hargaCtrl.text.isEmpty ||
         estimatedDurationCtrl.text.isEmpty) {
-      Get.snackbar('Error', 'Semua field harus diisi');
+      CustomSnackbar.error('Error', 'Semua field harus diisi');
       return;
     }
     try {
@@ -55,10 +55,10 @@ class EditServiceController extends GetxController {
         CustomSnackbar.success('Success', 'Layanan berhasil diperbarui');
         Get.offAllNamed('/dashboard');
       } else {
-        Get.snackbar('Error', 'Gagal memperbarui layanan');
+        CustomSnackbar.error('Error', 'Gagal memperbarui layanan');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal memperbarui layanan');
+      CustomSnackbar.error('Error', 'Gagal memperbarui layanan');
     } finally {
       isLoading.value = false;
     }

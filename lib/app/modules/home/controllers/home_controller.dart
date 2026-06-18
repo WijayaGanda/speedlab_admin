@@ -5,6 +5,7 @@ import 'package:speedlab_admin/app/data/providers/bookings_provider.dart';
 import 'package:speedlab_admin/app/data/services/auth_service.dart';
 import 'package:speedlab_admin/app/data/services/fcm_service.dart';
 import 'package:flutter/material.dart';
+import 'package:speedlab_admin/app/utils/widget/custom_snackbar.dart';
 
 class HomeController extends GetxController {
   final authService = Get.find<AuthService>();
@@ -51,8 +52,10 @@ class HomeController extends GetxController {
         // bookings.value = bookingsResponse.data ?? [];
         bookings.assignAll(bookingsResponse.data ?? []);
       } else {
-        Get.snackbar('Error', 'Failed to fetch bookings');
+        CustomSnackbar.error('Error', 'Failed to fetch bookings');
       }
+    } catch (e) {
+      CustomSnackbar.error('Error', 'An error occurred: $e');
     } finally {
       isLoading.value = false;
     }
