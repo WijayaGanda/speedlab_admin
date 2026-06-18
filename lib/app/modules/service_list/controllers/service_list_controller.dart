@@ -2,10 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:speedlab_admin/app/data/models/service_model.dart';
 import 'package:speedlab_admin/app/data/providers/service_provider.dart';
+import 'package:speedlab_admin/app/modules/dashboard/controllers/dashboard_controller.dart';
 import 'package:speedlab_admin/app/utils/widget/custom_snackbar.dart';
 
 class ServiceListController extends GetxController {
   final ServiceProvider serviceProvider;
+  final dashC = Get.find<DashboardController>();
 
   ServiceListController({required this.serviceProvider});
   var services = <ServiceModel>[].obs;
@@ -25,7 +27,9 @@ class ServiceListController extends GetxController {
         final servicesResponse = ServiceResponse.fromJson(response.body);
         services.value = servicesResponse.data;
       } else {
-        debugPrint('Failed to load services: ${response.statusCode} ${response.statusText}');
+        debugPrint(
+          'Failed to load services: ${response.statusCode} ${response.statusText}',
+        );
       }
     } catch (e) {
       debugPrint('Error occurred while fetching services: $e');
@@ -49,7 +53,15 @@ class ServiceListController extends GetxController {
       final response = await serviceProvider.deleteService(id);
       if (response.isOk) {
         CustomSnackbar.success('Success', 'Layanan berhasil dihapus');
-        Get.offAllNamed('/dashboard');
+        // Tunggu sebentar untuk snackbar, kemudian tutup semua modal
+        await Future.delayed(const Duration(milliseconds: 500));
+        // Tutup bottom sheet detail layanan
+        if (Get.isBottomSheetOpen ?? false) {
+          Get.back();
+        }
+        await Future.delayed(const Duration(milliseconds: 500));
+        await fetchServices();
+        dashC.changePage(1);
       } else {
         CustomSnackbar.error('Error', 'Gagal menghapus layanan');
       }

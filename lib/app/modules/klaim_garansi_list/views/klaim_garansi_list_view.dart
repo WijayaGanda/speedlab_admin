@@ -67,7 +67,7 @@ class KlaimGaransiListView extends GetView<KlaimGaransiListController> {
                 ),
                 tabs: const [
                   Tab(text: 'Menunggu Verifikasi'),
-                  Tab(text: 'Terverifikasi'),
+                  Tab(text: 'Diterima'),
                   Tab(text: 'Ditolak'),
                 ],
               ),
@@ -82,7 +82,7 @@ class KlaimGaransiListView extends GetView<KlaimGaransiListController> {
                     Colors.blue,
                   ),
                   _buildTabContent(
-                    'Terverifikasi',
+                    'Diterima',
                     Icons.check_circle,
                     Colors.green,
                   ),

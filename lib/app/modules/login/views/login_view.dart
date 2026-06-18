@@ -32,11 +32,11 @@ class LoginView extends GetView<LoginController> {
             CustomHeader(
               title: "Selamat Datang",
               subtitle: "Silakan masuk untuk melanjutkan",
-              // icon: Image.asset(
-              //   "assets/images/logo_spl.jpeg",
-              //   width: 70,
-              //   height: 70,
-              // ),
+              icon: Image.asset(
+                "assets/images/logo_spl.jpeg",
+                width: 70,
+                height: 70,
+              ),
             ),
             SizedBox(height: 30),
             Card(

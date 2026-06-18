@@ -154,6 +154,13 @@ class ServiceListView extends GetView<ServiceListController> {
                                       "Apakah Anda yakin ingin menghapus layanan ini?",
                                   onConfirm: () {
                                     controller.deleteService(service.id);
+                                    // Delay sebentar agar dialog konfirmasi tertutup dulu
+                                    Future.delayed(
+                                      const Duration(milliseconds: 200),
+                                      () {
+                                        Get.back(); // Tutup bottom sheet detail layanan
+                                      },
+                                    );
                                   },
                                 );
                               },

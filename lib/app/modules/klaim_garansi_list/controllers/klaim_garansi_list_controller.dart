@@ -46,8 +46,8 @@ class KlaimGaransiListController extends GetxController {
       switch (status) {
         case 'Menunggu Verifikasi':
           return apiStatus.toLowerCase() == 'menunggu verifikasi';
-        case 'Terverifikasi':
-          return apiStatus.toLowerCase() == 'terverifikasi';
+        case 'Diterima':
+          return apiStatus.toLowerCase() == 'diterima';
         case 'Ditolak':
           return apiStatus.toLowerCase() == 'ditolak';
         default:
