@@ -6,6 +6,8 @@ import '../modules/booking_list/bindings/booking_list_binding.dart';
 import '../modules/booking_list/views/booking_list_view.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
 import '../modules/dashboard/views/dashboard_view.dart';
+import '../modules/dete_override/bindings/dete_override_binding.dart';
+import '../modules/dete_override/views/dete_override_view.dart';
 import '../modules/edit_service/bindings/edit_service_binding.dart';
 import '../modules/edit_service/views/edit_service_view.dart';
 import '../modules/home/bindings/home_binding.dart';
@@ -16,6 +18,8 @@ import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/notification/bindings/notification_binding.dart';
 import '../modules/notification/views/notification_view.dart';
+import '../modules/operating_hour/bindings/operating_hour_binding.dart';
+import '../modules/operating_hour/views/operating_hour_view.dart';
 import '../modules/riwayat_servis/bindings/riwayat_servis_binding.dart';
 import '../modules/riwayat_servis/views/riwayat_servis_view.dart';
 import '../modules/service_history/bindings/service_history_binding.dart';
@@ -92,6 +96,16 @@ class AppPages {
       name: _Paths.NOTIFICATION,
       page: () => const NotificationView(),
       binding: NotificationBinding(),
+    ),
+    GetPage(
+      name: _Paths.OPERATING_HOUR,
+      page: () => const OperatingHourView(),
+      binding: OperatingHourBinding(),
+    ),
+    GetPage(
+      name: _Paths.DETE_OVERRIDE,
+      page: () => const DeteOverrideView(),
+      binding: DeteOverrideBinding(),
     ),
   ];
 }

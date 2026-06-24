@@ -65,6 +65,10 @@ class HomeController extends GetxController {
     Get.toNamed('/walkin-customer');
   }
 
+  void moveToOperatingHours() {
+    Get.toNamed('/operating-hour');
+  }
+
   void moveToNotifications() async {
     Get.toNamed('/notification');
   }

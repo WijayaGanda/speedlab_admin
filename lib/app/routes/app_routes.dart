@@ -15,6 +15,9 @@ abstract class Routes {
   static const WALKIN_CUSTOMER = _Paths.WALKIN_CUSTOMER;
   static const KLAIM_GARANSI_LIST = _Paths.KLAIM_GARANSI_LIST;
   static const NOTIFICATION = _Paths.NOTIFICATION;
+  static const OPERATING_HOUR = _Paths.OPERATING_HOUR;
+  static const DATE_OVERRIDE_DART = _Paths.DATE_OVERRIDE_DART;
+  static const DETE_OVERRIDE = _Paths.DETE_OVERRIDE;
 }
 
 abstract class _Paths {
@@ -31,4 +34,7 @@ abstract class _Paths {
   static const WALKIN_CUSTOMER = '/walkin-customer';
   static const KLAIM_GARANSI_LIST = '/klaim-garansi-list';
   static const NOTIFICATION = '/notification';
+  static const OPERATING_HOUR = '/operating-hour';
+  static const DATE_OVERRIDE_DART = '/date-override-dart';
+  static const DETE_OVERRIDE = '/dete-override';
 }

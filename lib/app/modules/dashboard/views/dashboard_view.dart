@@ -51,7 +51,7 @@ class DashboardView extends GetView<DashboardController> {
             SalomonBottomBarItem(
               icon: const Icon(Icons.security),
               title: Text(
-                "Daftar Klaim Garansi",
+                "Klaim Garansi",
                 style: GoogleFonts.poppins(fontSize: 12),
               ),
               // selectedColor: Colors.blue,

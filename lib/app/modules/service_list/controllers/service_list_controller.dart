@@ -11,7 +11,9 @@ class ServiceListController extends GetxController {
 
   ServiceListController({required this.serviceProvider});
   var services = <ServiceModel>[].obs;
+  var filteredServices = <ServiceModel>[].obs;
   var isLoading = false.obs;
+  var searchQuery = ''.obs;
 
   @override
   void onInit() {
@@ -26,6 +28,7 @@ class ServiceListController extends GetxController {
       if (response.isOk && response.body != null) {
         final servicesResponse = ServiceResponse.fromJson(response.body);
         services.value = servicesResponse.data;
+        filterServices(); // Filter setelah fetch
       } else {
         debugPrint(
           'Failed to load services: ${response.statusCode} ${response.statusText}',
@@ -37,6 +40,27 @@ class ServiceListController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void filterServices() {
+    if (searchQuery.value.isEmpty) {
+      filteredServices.value = services;
+    } else {
+      final query = searchQuery.value.toLowerCase();
+      filteredServices.value =
+          services
+              .where(
+                (service) =>
+                    (service.name ?? '').toLowerCase().contains(query) ||
+                    (service.description ?? '').toLowerCase().contains(query),
+              )
+              .toList();
+    }
+  }
+
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+    filterServices();
   }
 
   void moveToAddService() {

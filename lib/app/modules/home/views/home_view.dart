@@ -335,20 +335,20 @@ class HomeView extends GetView<HomeController> {
           ),
         );
       }),
-      // floatingActionButton: FloatingActionButton.extended(
-      //   onPressed: () => controller.walkin(),
-      //   backgroundColor: ColorTheme.neonYellow,
-      //   elevation: 8,
-      //   label: Text(
-      //     'Daftarkan Pelanggan',
-      //     style: GoogleFonts.poppins(
-      //       fontSize: 12,
-      //       fontWeight: FontWeight.w600,
-      //       color: Colors.black,
-      //     ),
-      //   ),
-      //   icon: const Icon(Icons.person_add, color: Colors.black),
-      // ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => controller.moveToOperatingHours(),
+        backgroundColor: ColorTheme.neonYellow,
+        elevation: 8,
+        label: Text(
+          'Jadwal Operasional',
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+        ),
+        icon: const Icon(Icons.access_time, color: Colors.black),
+      ),
     );
   }
 

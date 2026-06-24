@@ -49,28 +49,82 @@ class ServiceListView extends GetView<ServiceListController> {
           return _buildEmptyState();
         }
 
-        return RefreshIndicator(
-          onRefresh: () async {
-            controller.fetchServices();
-          },
-          color: ColorTheme.primary,
-          child: ListView.separated(
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
+        if (controller.filteredServices.isEmpty &&
+            controller.searchQuery.isNotEmpty) {
+          return _buildSearchEmptyState();
+        }
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: TextField(
+                onChanged: (value) => controller.updateSearchQuery(value),
+                decoration: InputDecoration(
+                  hintText: 'Cari layanan...',
+                  hintStyle: GoogleFonts.poppins(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+                  suffixIcon:
+                      controller.searchQuery.isNotEmpty
+                          ? IconButton(
+                            icon: Icon(Icons.clear, color: Colors.grey[400]),
+                            onPressed: () {
+                              controller.updateSearchQuery('');
+                            },
+                          )
+                          : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: ColorTheme.primary),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                style: GoogleFonts.poppins(fontSize: 14),
+              ),
             ),
-            padding: const EdgeInsets.only(
-              top: 10,
-              left: 24,
-              right: 24,
-              bottom: 40,
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  controller.fetchServices();
+                },
+                color: ColorTheme.primary,
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  padding: const EdgeInsets.only(
+                    top: 10,
+                    left: 24,
+                    right: 24,
+                    bottom: 40,
+                  ),
+                  itemCount: controller.filteredServices.length,
+                  separatorBuilder:
+                      (context, index) => const SizedBox(height: 16),
+                  itemBuilder: (context, index) {
+                    final service = controller.filteredServices[index];
+                    return _buildServiceCard(service);
+                  },
+                ),
+              ),
             ),
-            itemCount: controller.services.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              final service = controller.services[index];
-              return _buildServiceCard(service);
-            },
-          ),
+          ],
         );
       }),
       floatingActionButton: FloatingActionButton.extended(
@@ -539,6 +593,120 @@ class ServiceListView extends GetView<ServiceListController> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchEmptyState() {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: BouncingScrollPhysics(),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+              child: TextField(
+                onChanged: (value) => controller.updateSearchQuery(value),
+                decoration: InputDecoration(
+                  hintText: 'Cari layanan...',
+                  hintStyle: GoogleFonts.poppins(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+                  suffixIcon:
+                      controller.searchQuery.isNotEmpty
+                          ? IconButton(
+                            icon: Icon(Icons.clear, color: Colors.grey[400]),
+                            onPressed: () {
+                              controller.updateSearchQuery('');
+                            },
+                          )
+                          : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: ColorTheme.primary),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                style: GoogleFonts.poppins(fontSize: 14),
+              ),
+            ),
+            const SizedBox(height: 40),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: ColorTheme.primary.withOpacity(0.1),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.search_off_rounded,
+                      size: 52,
+                      color: Colors.orange.withOpacity(0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    "Layanan Tidak Ditemukan",
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF2D3142),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Pencarian \"${controller.searchQuery.value}\" tidak menemukan hasil. Coba gunakan kata kunci lain.",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[500],
+                      fontWeight: FontWeight.w400,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
