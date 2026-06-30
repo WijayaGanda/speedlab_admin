@@ -82,23 +82,23 @@ class LoginView extends GetView<LoginController> {
                         ),
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          Get.toNamed('/forgot-password');
-                        },
-                        child: Text(
-                          "Lupa Password?",
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ),
+                    // Align(
+                    //   alignment: Alignment.centerRight,
+                    //   child: TextButton(
+                    //     onPressed: () {
+                    //       Get.toNamed('/forgot-password');
+                    //     },
+                    //     child: Text(
+                    //       "Lupa Password?",
+                    //       style: GoogleFonts.poppins(
+                    //         color: Colors.grey,
+                    //         fontSize: 12,
+                    //         fontWeight: FontWeight.w500,
+                    //         decoration: TextDecoration.underline,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                     SizedBox(height: 10),
                     Obx(
                       () =>

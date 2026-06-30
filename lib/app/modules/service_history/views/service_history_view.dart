@@ -285,87 +285,158 @@ class ServiceHistoryView extends GetView<ServiceHistoryController> {
                   ],
                 ),
                 SizedBox(height: 10),
-                Align(
-                  alignment: AlignmentGeometry.topLeft,
-                  child: Text(
-                    "Tambahkan Foto Progress(opsional):",
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      top: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+                      bottom: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+                    ),
+                  ),
+                  child: Align(
+                    alignment: AlignmentGeometry.topLeft,
+                    child: Text(
+                      "Tambahkan Foto Progress(opsional):",
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
+                const SizedBox(height: 10),
+                Obx(() {
+                  if (controller.serviceHistory.isEmpty) {
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.orange.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            color: Colors.orange,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Tambahkan riwayat servis terlebih dahulu untuk mengupload foto pekerjaan.',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: Colors.orange[800],
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.blue.withOpacity(0.25),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.lightbulb_outline_rounded,
+                              color: Colors.blue,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Saat menambahkan foto, cukup tekan tombol Upload Sekarang. Tidak perlu menekan tombol Update Riwayat Servis terlebih dahulu.',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.blue[800],
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: () => _showPickerOptions(context),
+                        icon: const Icon(Icons.camera_alt_rounded),
+                        label: Text(
+                          'Pilih Foto',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black87,
+                          elevation: 0,
+                          side: BorderSide(color: Colors.grey.shade300),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
                 Obx(() {
                   if (controller.selectedImagePath.value.isEmpty) {
-                    return SizedBox.shrink();
-                  } else {
-                    return Column(
-                      children: [
-                        SizedBox(height: 20),
-                        Image.file(
-                          File(controller.selectedImagePath.value),
-                          width: double.infinity,
-                          height: 200,
-                          fit: BoxFit.cover,
-                        ),
-                        TextButton.icon(
-                          onPressed:
+                    return const SizedBox.shrink();
+                  }
+
+                  return Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      Image.file(
+                        File(controller.selectedImagePath.value),
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                      TextButton.icon(
+                        onPressed:
+                            controller.isFormDisabled
+                                ? null
+                                : () {
+                                  controller.selectedImagePath.value = '';
+                                },
+                        icon: Icon(
+                          Icons.delete_outline,
+                          color:
                               controller.isFormDisabled
-                                  ? null
-                                  : () {
-                                    controller.selectedImagePath.value = '';
-                                  },
-                          icon: Icon(
-                            Icons.delete_outline,
+                                  ? Colors.grey
+                                  : Colors.red,
+                        ),
+                        label: Text(
+                          "Hapus Gambar",
+                          style: GoogleFonts.poppins(
                             color:
                                 controller.isFormDisabled
                                     ? Colors.grey
                                     : Colors.red,
                           ),
-                          label: Text(
-                            "Hapus Gambar",
-                            style: GoogleFonts.poppins(
-                              color:
-                                  controller.isFormDisabled
-                                      ? Colors.grey
-                                      : Colors.red,
-                            ),
-                          ),
                         ),
-                      ],
-                    );
-                  }
+                      ),
+                    ],
+                  );
                 }),
-                SizedBox(height: 20),
-                Obx(
-                  () =>
-                      controller.serviceHistory.isEmpty
-                          ? SizedBox.shrink()
-                          : ElevatedButton.icon(
-                            onPressed:
-                                () => _showPickerOptions(
-                                  context,
-                                ), // Panggil fungsi BottomSheet
-                            icon: const Icon(Icons.camera_alt_rounded),
-                            label: Text(
-                              'Pilih Foto',
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.black87,
-                              elevation: 0,
-                              side: BorderSide(color: Colors.grey.shade300),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                ),
-                SizedBox(height: 10),
+                const SizedBox(height: 12),
                 TextField(
                   // Update isi variabel tiap kali user mengetik
                   onChanged:
@@ -395,9 +466,14 @@ class ServiceHistoryView extends GetView<ServiceHistoryController> {
                 ),
                 SizedBox(height: 10),
                 Obx(() {
+                  if (controller.serviceHistory.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+
                   if (controller.isUploading.value) {
                     return const CircularProgressIndicator(color: Colors.black);
                   }
+
                   return ElevatedButton.icon(
                     onPressed: controller.uploadImage,
                     icon: const Icon(Icons.cloud_upload_rounded),
@@ -505,6 +581,16 @@ class ServiceHistoryView extends GetView<ServiceHistoryController> {
                   );
                 }),
                 const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      top: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+                      bottom: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+                    ),
+                  ),
+                  child: const SizedBox.shrink(),
+                ),
                 Obx(
                   () =>
                       controller.isFormDisabled

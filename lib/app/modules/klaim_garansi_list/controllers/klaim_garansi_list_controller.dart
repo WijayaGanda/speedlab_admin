@@ -1,6 +1,7 @@
 import 'package:action_slider/action_slider.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:speedlab_admin/app/data/models/warranty_model.dart';
 import 'package:speedlab_admin/app/data/providers/warranty_claim.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +17,47 @@ class KlaimGaransiListController extends GetxController {
 
   final warranties = <WarrantyModel>[].obs;
   final isLoading = false.obs;
+  final searchQuery = ''.obs;
+  final selectedFilterData = Rx<DateTime?>(null);
 
   @override
   void onInit() {
     super.onInit();
     fetchWarranties();
+  }
+
+  bool get hasActiveFilters {
+    return searchQuery.value.trim().isNotEmpty ||
+        selectedFilterData.value != null;
+  }
+
+  void setSearchQuery(String value) {
+    searchQuery.value = value;
+  }
+
+  void clearSearch() {
+    searchQuery.value = '';
+  }
+
+  void clearDateFilter() {
+    selectedFilterData.value = null;
+  }
+
+  Future<void> pickFilterDate() async {
+    DateTime? picked = await showDatePicker(
+      context: Get.context!,
+      initialDate: selectedFilterData.value ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      selectedFilterData.value = picked;
+    }
+  }
+
+  String formatDate(DateTime? date) {
+    if (date == null) return 'Semua tanggal';
+    return DateFormat('dd MMM yyyy').format(date);
   }
 
   Future<void> fetchWarranties() async {
@@ -40,19 +77,59 @@ class KlaimGaransiListController extends GetxController {
     }
   }
 
+  bool _matchesSearchQuery(WarrantyModel warranty, String query) {
+    if (query.isEmpty) return true;
+
+    final haystack =
+        [
+          warranty.id,
+          warranty.complaint,
+          warranty.notes,
+          warranty.rejectionReason,
+          warranty.userId?['name']?.toString(),
+          warranty.userId?['phone']?.toString(),
+          warranty.userId?['email']?.toString(),
+          warranty.motorcycleId?['brand']?.toString(),
+          warranty.motorcycleId?['model']?.toString(),
+          warranty.motorcycleId?['licensePlate']?.toString(),
+          formatDate(warranty.claimDate),
+        ].whereType<String>().join(' ').toLowerCase();
+
+    return haystack.contains(query);
+  }
+
   List<WarrantyModel> getWarrantiesByStatus(String status) {
+    final query = searchQuery.value.trim().toLowerCase();
+
     return warranties.where((warranty) {
       String apiStatus = warranty.status ?? '';
+      bool matchesStatus = false;
+
       switch (status) {
         case 'Menunggu Verifikasi':
-          return apiStatus.toLowerCase() == 'menunggu verifikasi';
+          matchesStatus = apiStatus.toLowerCase() == 'menunggu verifikasi';
+          break;
         case 'Diterima':
-          return apiStatus.toLowerCase() == 'diterima';
+          matchesStatus = apiStatus.toLowerCase() == 'diterima';
+          break;
         case 'Ditolak':
-          return apiStatus.toLowerCase() == 'ditolak';
+          matchesStatus = apiStatus.toLowerCase() == 'ditolak';
+          break;
         default:
-          return false;
+          matchesStatus = false;
       }
+
+      final matchesDate =
+          selectedFilterData.value == null || warranty.claimDate == null
+              ? true
+              : warranty.claimDate!.year == selectedFilterData.value!.year &&
+                  warranty.claimDate!.month ==
+                      selectedFilterData.value!.month &&
+                  warranty.claimDate!.day == selectedFilterData.value!.day;
+
+      return matchesStatus &&
+          matchesDate &&
+          _matchesSearchQuery(warranty, query);
     }).toList();
   }
 

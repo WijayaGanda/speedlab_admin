@@ -85,6 +85,14 @@ void main() {
 
     // 2. Verifikasi Komponen Dasar (AppBar & TabBar)
     expect(find.text('Riwayat Booking'), findsOneWidget);
+    expect(find.byTooltip('Filter'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Filter'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Filter Booking'), findsOneWidget);
+    expect(find.text('Cari booking...'), findsOneWidget);
+    expect(find.text('Reset'), findsOneWidget);
 
     // 🔥 PERBAIKAN DI SINI: Kita beritahu mesin bahwa ada 2 tulisan ini (Tab & Kartu)
     expect(find.text('Menunggu Verifikasi'), findsNWidgets(2));

@@ -42,10 +42,19 @@ class BookingListView extends GetView<BookingListController> {
                   icon: const Icon(Icons.refresh, color: Colors.white),
                   tooltip: 'Refresh',
                 ),
-                IconButton(
-                  onPressed: () => controller.pickFilterDate(),
-                  icon: const Icon(Icons.filter_list, color: Colors.white),
-                  tooltip: 'Filter',
+                Obx(
+                  () => IconButton(
+                    onPressed: _showFilterBottomSheet,
+                    icon: Icon(
+                      Icons.filter_list,
+                      color:
+                          controller.searchQuery.value.trim().isNotEmpty ||
+                                  controller.selectedFilterData.value != null
+                              ? ColorTheme.neonYellow
+                              : Colors.white,
+                    ),
+                    tooltip: 'Filter',
+                  ),
                 ),
               ],
             ),
@@ -53,6 +62,33 @@ class BookingListView extends GetView<BookingListController> {
         ),
         body: Column(
           children: [
+            Obx(
+              () =>
+                  (controller.searchQuery.value.trim().isNotEmpty ||
+                          controller.selectedFilterData.value != null)
+                      ? Container(
+                        width: double.infinity,
+                        color: Colors.black,
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            if (controller.searchQuery.value.trim().isNotEmpty)
+                              _buildActiveFilterChip(
+                                'Cari: ${controller.searchQuery.value.trim()}',
+                                onRemoved: controller.clearSearch,
+                              ),
+                            if (controller.selectedFilterData.value != null)
+                              _buildActiveFilterChip(
+                                'Tanggal: ${controller.formatDate(controller.selectedFilterData.value)}',
+                                onRemoved: controller.clearDateFilter,
+                              ),
+                          ],
+                        ),
+                      )
+                      : const SizedBox.shrink(),
+            ),
             Container(
               color: Colors.black, // Tab panel konsisten hitam
               child: TabBar(
@@ -113,6 +149,139 @@ class BookingListView extends GetView<BookingListController> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showFilterBottomSheet() {
+    final searchController = TextEditingController(
+      text: controller.searchQuery.value,
+    );
+
+    CustomModal.showBottomSheet(
+      title: 'Filter Booking',
+      height: Get.height * 0.65,
+      padding: const EdgeInsets.all(20),
+      content: Obx(
+        () => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Cari booking berdasarkan ID, plat, layanan, atau keluhan',
+              style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: searchController,
+              onChanged: controller.setSearchQuery,
+              decoration: InputDecoration(
+                hintText: 'Cari booking...',
+                prefixIcon: const Icon(Icons.search_rounded),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Tanggal booking',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () async {
+                await controller.pickFilterDate();
+              },
+              icon: const Icon(Icons.calendar_today_rounded, size: 18),
+              label: Text(
+                controller.selectedFilterData.value == null
+                    ? 'Semua tanggal'
+                    : controller.formatDate(
+                      controller.selectedFilterData.value,
+                    ),
+                style: GoogleFonts.poppins(fontSize: 13),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.black,
+                side: const BorderSide(color: Colors.black12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  searchController.clear();
+                  controller.clearSearch();
+                  controller.clearDateFilter();
+                },
+                icon: const Icon(Icons.restart_alt_rounded),
+                label: Text(
+                  'Reset',
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveFilterChip(String label, {VoidCallback? onRemoved}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: ColorTheme.neonYellow.withOpacity(0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: ColorTheme.neonYellow.withOpacity(0.45)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.tune_rounded, size: 14, color: ColorTheme.neonYellow),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: ColorTheme.neonYellow,
+            ),
+          ),
+          if (onRemoved != null) ...[
+            const SizedBox(width: 6),
+            InkWell(
+              onTap: onRemoved,
+              borderRadius: BorderRadius.circular(999),
+              child: const Icon(
+                Icons.close_rounded,
+                size: 14,
+                color: ColorTheme.neonYellow,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -563,6 +732,12 @@ class BookingListView extends GetView<BookingListController> {
                   booking,
                   'Sedang Dikerjakan',
                 ),
+          ),
+          ActionSheetItem(
+            title: 'Batalkan Booking',
+            icon: Icons.cancel_rounded,
+            isDestructive: true,
+            onPressed: () => controller.cancelBooking(booking),
           ),
         ];
         break;

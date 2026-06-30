@@ -34,6 +34,7 @@ class BookingListController extends GetxController {
   var isProcessingPayment = false.obs;
 
   var selectedFilterData = Rx<DateTime?>(null);
+  var searchQuery = ''.obs;
 
   @override
   void onInit() {
@@ -65,6 +66,18 @@ class BookingListController extends GetxController {
     if (picked != null) {
       selectedFilterData.value = picked;
     }
+  }
+
+  void setSearchQuery(String value) {
+    searchQuery.value = value;
+  }
+
+  void clearSearch() {
+    searchQuery.value = '';
+  }
+
+  void clearDateFilter() {
+    selectedFilterData.value = null;
   }
 
   Future<void> fetchBookings() async {
@@ -170,23 +183,55 @@ class BookingListController extends GetxController {
   }
 
   // ========== FILTERING METHODS ==========
+  bool _matchesSearchQuery(BookingsModel booking, String query) {
+    if (query.isEmpty) return true;
+
+    final haystack =
+        [
+          booking.id,
+          booking.status,
+          booking.complaint,
+          booking.notes,
+          booking.bookingTime,
+          formatDate(booking.bookingDate),
+          getMotorcycleInfo(booking),
+          getServicesInfo(booking),
+          booking.userId?['name']?.toString(),
+          booking.userId?['phone']?.toString(),
+          booking.userId?['email']?.toString(),
+        ].whereType<String>().join(' ').toLowerCase();
+
+    return haystack.contains(query);
+  }
+
   List<BookingsModel> getBookingsByStatus(String status) {
+    final query = searchQuery.value.trim().toLowerCase();
+
     return bookings.where((booking) {
       String apiStatus = booking.status ?? '';
+      bool matchesStatus = false;
+
       switch (status) {
         case 'Menunggu Verifikasi':
-          return apiStatus.toLowerCase() == 'menunggu verifikasi';
+          matchesStatus = apiStatus.toLowerCase() == 'menunggu verifikasi';
+          break;
         case 'Terverifikasi':
-          return apiStatus.toLowerCase() == 'terverifikasi';
+          matchesStatus = apiStatus.toLowerCase() == 'terverifikasi';
+          break;
         case 'Sedang Dikerjakan':
-          return apiStatus.toLowerCase() == 'sedang dikerjakan';
+          matchesStatus = apiStatus.toLowerCase() == 'sedang dikerjakan';
+          break;
         case 'Selesai':
-          return apiStatus.toLowerCase() == 'selesai';
+          matchesStatus = apiStatus.toLowerCase() == 'selesai';
+          break;
         case 'Dibatalkan':
-          return apiStatus.toLowerCase() == 'dibatalkan';
+          matchesStatus = apiStatus.toLowerCase() == 'dibatalkan';
+          break;
         default:
-          return false;
+          matchesStatus = false;
       }
+
+      return matchesStatus && _matchesSearchQuery(booking, query);
     }).toList();
   }
 
